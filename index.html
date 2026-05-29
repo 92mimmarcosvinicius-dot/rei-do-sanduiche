@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rei do Sanduíche — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading-screen" class="loading-screen">
+    <img src="assets/logo.jpg" alt="Rei do Sanduíche" style="width:100px;border-radius:12px">
+    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  </div>
+
+  <!-- Login -->
+  <div class="login-page">
+    <div class="login-card">
+      <img src="assets/logo.jpg" alt="Rei do Sanduíche" class="login-logo" style="width:140px;border-radius:16px">
+
+      <p class="login-subtitle">Sistema de Auditoria Operacional</p>
+
+      <form id="login-form" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label" for="login-cpf">CPF</label>
+          <input class="form-input" type="text" id="login-cpf" placeholder="000.000.000-00" data-mask="cpf" inputmode="numeric" maxlength="14" autocomplete="off" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-pass">Senha</label>
+          <div style="position:relative">
+            <input class="form-input" type="password" id="login-pass" placeholder="Digite sua senha" autocomplete="current-password" required style="padding-right:3rem">
+            <button type="button" id="toggle-pass" style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0.25rem" title="Mostrar senha">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <p class="form-error visible" id="error-general" style="margin-bottom:1rem;display:none"></p>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full" id="btn-login">
+          Entrar
+        </button>
+      </form>
+
+      <p class="text-center text-muted text-xs mt-6">
+        Rei do Sanduíche &copy; 2024 — Sistema Interno
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal: Troca de senha obrigatória (primeiro acesso) -->
+  <div class="modal-overlay" id="modal-primeiro-acesso">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Troca de Senha Obrigatória</h3>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1.25rem">
+          Este é seu primeiro acesso. Por segurança, crie uma nova senha pessoal.
+        </p>
+        <form id="form-troca-senha" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label" for="senha-atual">Senha atual</label>
+            <input class="form-input" type="password" id="senha-atual" placeholder="Senha que você usou agora" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="senha-nova">Nova senha</label>
+            <input class="form-input" type="password" id="senha-nova" placeholder="Mínimo 4 caracteres" minlength="4" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="senha-confirma">Confirmar nova senha</label>
+            <input class="form-input" type="password" id="senha-confirma" placeholder="Repita a nova senha" required>
+          </div>
+          <p class="form-error" id="error-troca" style="display:none;margin-bottom:0.75rem"></p>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary w-full" id="btn-trocar-senha">
+          Salvar Nova Senha
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/db.js"></script>
+  <script src="assets/db-cloud.js"></script>
+  <script src="assets/auth.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await DBCloud.init();
+      DB.seedIfEmpty();
+
+      // Se já logado, redirecionar
+      const session = DB.getSession();
+      if (session) {
+        window.location.href = Auth._getRedirectUrl(session.perfil);
+        return;
+      }
+
+      App.hideLoading();
+
+      // Máscara de CPF
+      const inputCPF = document.getElementById('login-cpf');
+      App.maskCPF(inputCPF);
+
+      // Toggle senha visível
+      const inputPass = document.getElementById('login-pass');
+      document.getElementById('toggle-pass').addEventListener('click', () => {
+        const isPass = inputPass.type === 'password';
+        inputPass.type = isPass ? 'text' : 'password';
+      });
+
+      const form = document.getElementById('login-form');
+      const btnLogin = document.getElementById('btn-login');
+      const errorGeneral = document.getElementById('error-general');
+
+      let _loginResult = null;
+
+      function showError(msg) {
+        errorGeneral.textContent = msg;
+        errorGeneral.style.display = 'block';
+      }
+
+      function hideError() {
+        errorGeneral.style.display = 'none';
+      }
+
+      // --- Login ---
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+        inputCPF.classList.remove('error');
+        inputPass.classList.remove('error');
+
+        const cpf = inputCPF.value.trim();
+        const senha = inputPass.value;
+
+        if (DB.cleanCPF(cpf).length < 11) {
+          inputCPF.classList.add('error');
+          showError('CPF deve ter 11 dígitos');
+          return;
+        }
+        if (!senha) {
+          inputPass.classList.add('error');
+          return;
+        }
+
+        btnLogin.disabled = true;
+        btnLogin.textContent = 'Verificando...';
+
+        try {
+          const result = await Auth.login(cpf, senha);
+
+          if (!result.ok) {
+            showError(result.erro);
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Entrar';
+            return;
+          }
+
+          // Primeiro acesso — obrigar troca de senha
+          if (result.primeiroAcesso) {
+            _loginResult = result;
+            document.getElementById('senha-atual').value = senha;
+            App.openModal('modal-primeiro-acesso');
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Entrar';
+            return;
+          }
+
+          // Login normal
+          App.toast('Bem-vindo(a), ' + result.session.nome + '!', 'success');
+          setTimeout(() => {
+            window.location.href = result.redirectUrl;
+          }, 500);
+
+        } catch (err) {
+          showError('Erro inesperado. Tente novamente.');
+          btnLogin.disabled = false;
+          btnLogin.textContent = 'Entrar';
+        }
+      });
+
+      // --- Troca de senha no primeiro acesso ---
+      document.getElementById('btn-trocar-senha').addEventListener('click', async () => {
+        const senhaAtual = document.getElementById('senha-atual').value;
+        const senhaNova = document.getElementById('senha-nova').value;
+        const senhaConfirma = document.getElementById('senha-confirma').value;
+        const errorTroca = document.getElementById('error-troca');
+
+        errorTroca.style.display = 'none';
+
+        if (senhaNova.length < 4) {
+          errorTroca.textContent = 'Nova senha deve ter ao menos 4 caracteres';
+          errorTroca.style.display = 'block';
+          return;
+        }
+
+        if (senhaNova !== senhaConfirma) {
+          errorTroca.textContent = 'As senhas não coincidem';
+          errorTroca.style.display = 'block';
+          return;
+        }
+
+        if (senhaNova === senhaAtual) {
+          errorTroca.textContent = 'A nova senha deve ser diferente da atual';
+          errorTroca.style.display = 'block';
+          return;
+        }
+
+        const btn = document.getElementById('btn-trocar-senha');
+        btn.disabled = true;
+        btn.textContent = 'Salvando...';
+
+        const result = await Auth.changePassword(senhaAtual, senhaNova);
+
+        if (!result.ok) {
+          errorTroca.textContent = result.erro;
+          errorTroca.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Salvar Nova Senha';
+          return;
+        }
+
+        App.closeModal('modal-primeiro-acesso');
+        App.toast('Senha alterada com sucesso!', 'success');
+
+        setTimeout(() => {
+          window.location.href = _loginResult.redirectUrl;
+        }, 800);
+      });
+    });
+  </script>
+</body>
+</html>

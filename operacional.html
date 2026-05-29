@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rei do Sanduíche — Operacional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading-screen" class="loading-screen">
+    <img src="assets/logo.jpg" alt="Rei do Sanduíche" style="width:100px;border-radius:12px">
+    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Overlay mobile -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="assets/logo.jpg" alt="Rei do Sanduíche" style="width:42px;height:42px;border-radius:10px;object-fit:cover">
+        <div class="sidebar-brand">
+          <span class="sidebar-brand-name">Rei do Sanduíche</span>
+          <span class="sidebar-brand-role">Operacional</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">Menu</div>
+
+        <a class="sidebar-link active" data-page="inicio" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Início
+        </a>
+
+        <a class="sidebar-link" data-page="checklist" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Checklist Diário
+        </a>
+
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">F</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Funcionária</div>
+            <div class="sidebar-user-role">Operacional</div>
+          </div>
+          <button class="btn-ghost btn-sm" onclick="Auth.logout()" title="Sair" style="padding:0.4rem;margin-left:0.25rem">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="main-content">
+      <header class="content-header">
+        <div class="flex items-center gap-4">
+          <button class="menu-toggle" aria-label="Abrir menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <h2 id="page-title">Início</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="badge badge-info" id="header-date"></span>
+        </div>
+      </header>
+
+      <div class="content-body" id="page-content">
+        <!-- Injetado via JS -->
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/db.js"></script>
+  <script src="assets/db-cloud.js"></script>
+  <script src="assets/auth.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/operacional-checklist.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await DBCloud.init();
+      const session = Auth.requireOperacional();
+      if (!session) return;
+
+      document.getElementById('user-name').textContent = session.nome;
+      document.getElementById('user-avatar').textContent = session.nome.charAt(0).toUpperCase();
+      document.getElementById('header-date').textContent = new Date().toLocaleDateString('pt-BR', {
+        weekday: 'short', day: '2-digit', month: 'short'
+      });
+
+      // Páginas
+      const pages = {
+        inicio: renderInicio,
+        checklist: () => Checklist.render()
+      };
+
+      function navigateTo(page) {
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        const link = document.querySelector('[data-page="' + page + '"]');
+        if (link) {
+          link.classList.add('active');
+          document.getElementById('page-title').textContent = link.textContent.trim();
+        }
+        const fn = pages[page] || renderPlaceholder;
+        fn();
+        document.querySelector('.sidebar').classList.remove('open');
+        document.querySelector('.sidebar-overlay').classList.remove('active');
+      }
+
+      document.querySelectorAll('.sidebar-link[data-page]').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          navigateTo(link.dataset.page);
+        });
+      });
+
+      function renderInicio() {
+        const d = new Date();
+        const hoje = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        const ckHoje = DB.query(DB.COLLECTIONS.checklists, c => c.data === hoje && (c.usuarioId === session.usuarioId || c.funcionarioId === session.usuarioId));
+        const totalInsumos = DB.getAll(DB.COLLECTIONS.insumos).filter(i => i.ativo).length;
+
+        let html = '<div class="card mb-4" style="text-align:center;padding:2rem 1.5rem">';
+        html += '<div style="font-size:3rem;margin-bottom:0.75rem">👑</div>';
+        html += '<h3 class="font-bold" style="margin-bottom:0.25rem">Olá, ' + App.escapeHtml(session.nome) + '!</h3>';
+        html += '<p class="text-muted text-sm mb-4">' + new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '</p>';
+
+        if (ckHoje.length > 0) {
+          const ckAtivo = ckHoje.find(c => c.status !== 'desconsiderado') || ckHoje[0];
+          html += '<div class="badge badge-success" style="font-size:0.875rem;padding:0.5rem 1rem">✅ Checklist de hoje já foi enviado</div>';
+          html += '<p class="text-xs text-muted mt-2">Enviado às ' + App.formatDate(ckAtivo.horarioFim || ckAtivo.criadoEm).split(' ')[1] + ' — ' + ckAtivo.itensPreenchidos + '/' + ckAtivo.totalItens + ' itens</p>';
+          if (ckAtivo.editadoEm) html += '<p class="text-xs" style="color:var(--warning);margin-top:0.25rem">Editado em ' + App.formatDate(ckAtivo.editadoEm) + '</p>';
+          html += '<div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1rem">';
+          html += '<button class="btn btn-warning btn-sm" onclick="Checklist.editarChecklist(\'' + ckAtivo.id + '\')">✏️ Editar Checklist</button>';
+          html += '<button class="btn btn-secondary btn-sm" onclick="document.querySelector(\'[data-page=checklist]\').click()">+ Novo Checklist</button>';
+          html += '</div>';
+        } else {
+          html += '<p class="text-muted mb-4" style="font-size:0.9375rem">Seu checklist de hoje ainda não foi preenchido.</p>';
+          html += '<button class="btn btn-primary btn-lg" onclick="document.querySelector(\'[data-page=checklist]\').click()">Iniciar Checklist (' + totalInsumos + ' itens)</button>';
+        }
+        html += '</div>';
+
+        // Últimos checklists
+        const ultimos = DB.query(DB.COLLECTIONS.checklists, c => c.usuarioId === session.usuarioId)
+          .sort((a, b) => b.data.localeCompare(a.data)).slice(0, 5);
+        if (ultimos.length > 0) {
+          html += '<div class="card"><div class="card-header"><h3 class="card-title">Seus últimos checklists</h3></div>';
+          html += '<div class="table-container"><table class="table"><thead><tr><th>Data</th><th>Itens</th><th>Horário</th><th>Ação</th></tr></thead><tbody>';
+          ultimos.forEach(c => {
+            const statusBadge = c.status === 'desconsiderado' ? '<span class="badge badge-neutral" style="margin-left:0.25rem">desconsiderado</span>' : '';
+            html += '<tr><td>' + App.formatDateShort(c.data) + statusBadge + '</td>';
+            html += '<td><span class="badge ' + (c.itensPreenchidos === c.totalItens ? 'badge-success' : 'badge-warning') + '">' + c.itensPreenchidos + '/' + c.totalItens + '</span></td>';
+            html += '<td class="text-sm text-muted">' + App.formatDate(c.horarioFim || c.criadoEm).split(' ')[1] + '</td>';
+            html += '<td><button class="btn btn-ghost btn-sm" onclick="Checklist.editarChecklist(\'' + c.id + '\')" style="font-size:0.75rem">✏️ Editar</button></td></tr>';
+          });
+          html += '</tbody></table></div></div>';
+        }
+
+        document.getElementById('page-content').innerHTML = html;
+      }
+
+      function renderPlaceholder() {
+        document.getElementById('page-content').innerHTML =
+          '<div class="card"><div class="empty-state"><div class="empty-state-icon">🚧</div>' +
+          '<p class="empty-state-title">Em construção</p>' +
+          '<p class="empty-state-text">Este módulo será implementado nas próximas fases.</p></div></div>';
+      }
+
+      App.init();
+      Checklist.init();
+      navigateTo('inicio');
+    });
+  </script>
+</body>
+</html>

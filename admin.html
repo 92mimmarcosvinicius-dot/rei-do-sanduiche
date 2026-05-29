@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rei do Sanduíche — Painel Administrativo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading-screen" class="loading-screen">
+    <img src="assets/logo.jpg" alt="Rei do Sanduíche" style="width:100px;border-radius:12px">
+    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  </div>
+
+  <div class="app-layout">
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar Admin -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="assets/logo.jpg" alt="Rei do Sanduíche" style="width:42px;height:42px;border-radius:10px;object-fit:cover">
+        <div class="sidebar-brand">
+          <span class="sidebar-brand-name">Rei do Sanduíche</span>
+          <span class="sidebar-brand-role" id="sidebar-perfil-label">Administração</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">Visão Geral</div>
+        <a class="sidebar-link active" data-page="dashboard" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a class="sidebar-link" data-page="alertas" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Alertas
+          <span class="sidebar-badge" id="badge-alertas" style="display:none;background:var(--warning)">0</span>
+        </a>
+        <a class="sidebar-link" data-page="divergencias" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Divergências
+          <span class="sidebar-badge" id="badge-divergencias" style="display:none">0</span>
+        </a>
+        <a class="sidebar-link" data-page="relatorios" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Relatórios
+        </a>
+
+        <div class="sidebar-section-title">Gestão</div>
+        <a class="sidebar-link" data-page="insumos" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Insumos
+        </a>
+        <a class="sidebar-link" data-page="fichas" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Fichas Técnicas
+        </a>
+        <a class="sidebar-link" data-page="compras" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Compras
+        </a>
+        <a class="sidebar-link" data-page="vendas" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Vendas
+        </a>
+        <a class="sidebar-link" data-page="fazer-checklist" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+          Fazer Checklist
+        </a>
+        <a class="sidebar-link" data-page="checklists" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Checklists
+        </a>
+        <a class="sidebar-link" data-page="fotos" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Fotos e Evidências
+        </a>
+
+        <div class="sidebar-section-title">Sistema</div>
+        <a class="sidebar-link" data-page="usuarios" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Usuários
+        </a>
+        <a class="sidebar-link" data-page="logs" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Logs de Auditoria
+        </a>
+        <a class="sidebar-link" data-page="config" href="#">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configurações
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="user-avatar">E</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="user-name">Emilly</div>
+            <div class="sidebar-user-role" id="user-role-label">Administradora</div>
+          </div>
+          <button class="btn-ghost btn-sm" onclick="Auth.logout()" title="Sair" style="padding:0.4rem;margin-left:0.25rem">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+      <header class="content-header">
+        <div class="flex items-center gap-4">
+          <button class="menu-toggle" aria-label="Abrir menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <h2 id="page-title">Dashboard</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-secondary btn-sm" onclick="DB.downloadBackup()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Backup
+          </button>
+          <span class="badge badge-info" id="header-date"></span>
+        </div>
+      </header>
+
+      <div class="content-body" id="page-content">
+        <!-- Injetado via JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Cadastrar/Editar Usuário -->
+  <div class="modal-overlay" id="modal-usuario">
+    <div class="modal" style="max-width:540px">
+      <div class="modal-header">
+        <h3 id="modal-usuario-titulo">Novo Funcionário</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-usuario" autocomplete="off">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem">
+            <div id="foto-preview" style="width:64px;height:64px;border-radius:50%;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;border:2px dashed var(--border-medium);cursor:pointer" title="Clique para adicionar foto">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <input type="file" id="input-foto" accept="image/*" style="display:none">
+            <div style="flex:1">
+              <p class="text-sm font-medium">Foto do funcionário</p>
+              <p class="text-xs text-muted">Opcional. Clique no ícone para selecionar.</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="usr-nome">Nome completo *</label>
+            <input class="form-input" type="text" id="usr-nome" placeholder="Nome do funcionário" required>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label" for="usr-cpf">CPF *</label>
+              <input class="form-input" type="text" id="usr-cpf" placeholder="000.000.000-00" data-mask="cpf" inputmode="numeric" maxlength="14" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="usr-telefone">Telefone</label>
+              <input class="form-input" type="text" id="usr-telefone" placeholder="(00) 00000-0000" data-mask="telefone" inputmode="numeric" maxlength="15">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="form-group">
+              <label class="form-label" for="usr-cargo">Cargo</label>
+              <input class="form-input" type="text" id="usr-cargo" placeholder="Ex: Atendente" value="Atendente">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="usr-perfil">Perfil de acesso *</label>
+              <select class="form-input" id="usr-perfil">
+                <option value="operacional">Operacional (Funcionário)</option>
+                <option value="gerente">Gerente Operacional</option>
+                <option value="financeiro">Financeiro</option>
+                <option value="auditoria">Auditoria</option>
+                <option value="visualizacao">Somente Visualização</option>
+                <option value="master">Administrador Master</option>
+              </select>
+            </div>
+          </div>
+          <input type="hidden" id="usr-id">
+          <input type="hidden" id="usr-foto-data">
+          <p class="form-error" id="error-usuario" style="display:none;margin-top:0.5rem"></p>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-salvar-usuario">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Redefinir Senha -->
+  <div class="modal-overlay" id="modal-reset-senha">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <h3>Redefinir Senha</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-sm text-muted mb-4" id="reset-msg">Defina uma nova senha para o funcionário.</p>
+        <div class="form-group">
+          <label class="form-label" for="reset-nova-senha">Nova senha</label>
+          <input class="form-input" type="text" id="reset-nova-senha" placeholder="Mínimo 4 caracteres">
+        </div>
+        <input type="hidden" id="reset-user-id">
+        <p class="form-error" id="error-reset" style="display:none"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+        <button type="button" class="btn btn-warning" id="btn-reset-senha">Redefinir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Histórico do Usuário -->
+  <div class="modal-overlay" id="modal-historico">
+    <div class="modal" style="max-width:640px">
+      <div class="modal-header">
+        <h3 id="historico-titulo">Histórico</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+        <div id="historico-conteudo"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/db.js"></script>
+  <script src="assets/db-cloud.js"></script>
+  <script src="assets/auth.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/admin-usuarios.js"></script>
+  <script src="assets/admin-insumos.js"></script>
+  <script src="assets/admin-fichas.js"></script>
+  <script src="assets/admin-compras.js"></script>
+  <script src="assets/admin-vendas.js"></script>
+  <script src="assets/motor-divergencias.js"></script>
+  <script src="assets/admin-divergencias.js"></script>
+  <script src="assets/admin-dashboard.js"></script>
+  <script src="assets/admin-alertas.js"></script>
+  <script src="assets/admin-relatorios.js"></script>
+  <script src="assets/admin-fotos.js"></script>
+  <script src="assets/admin-checklists.js"></script>
+  <script src="assets/admin-config.js"></script>
+  <script src="assets/operacional-checklist.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await DBCloud.init();
+      const session = Auth.requireAdmin();
+      if (!session) return;
+
+      // Preencher info do usuário
+      document.getElementById('user-name').textContent = session.nome;
+      document.getElementById('user-avatar').textContent = session.nome.charAt(0).toUpperCase();
+      const perfilInfo = DB.PERFIS[session.perfil];
+      if (perfilInfo) {
+        document.getElementById('user-role-label').textContent = perfilInfo.nome;
+        document.getElementById('sidebar-perfil-label').textContent = perfilInfo.nome;
+      }
+      document.getElementById('header-date').textContent = new Date().toLocaleDateString('pt-BR', {
+        weekday: 'short', day: '2-digit', month: 'short'
+      });
+
+      // Páginas
+      const pages = {
+        dashboard: AdminDashboard.render,
+        alertas: AdminAlertas.render,
+        usuarios: AdminUsuarios.render,
+        logs: renderLogs,
+        divergencias: AdminDivergencias.render,
+        insumos: AdminInsumos.render,
+        fichas: AdminFichas.render,
+        compras: AdminCompras.render,
+        vendas: AdminVendas.render,
+        'fazer-checklist': () => Checklist.render(),
+        checklists: AdminChecklists.render,
+        fotos: AdminFotos.render,
+        relatorios: AdminRelatorios.render,
+        config: AdminConfig.render
+      };
+
+      function navigateTo(page) {
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        const link = document.querySelector('[data-page="' + page + '"]');
+        if (link) {
+          link.classList.add('active');
+          document.getElementById('page-title').textContent = link.textContent.trim();
+        }
+        const renderFn = pages[page] || renderPlaceholder;
+        renderFn();
+
+        document.querySelector('.sidebar').classList.remove('open');
+        document.querySelector('.sidebar-overlay').classList.remove('active');
+      }
+
+      document.querySelectorAll('.sidebar-link[data-page]').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          navigateTo(link.dataset.page);
+        });
+      });
+
+      // Atualizar badge de alertas
+      try {
+        const alertasCount = AdminAlertas.gerarAlertas().filter(a => a.severidade === 'critico').length;
+        const badgeAlertas = document.getElementById('badge-alertas');
+        if (alertasCount > 0) { badgeAlertas.textContent = alertasCount; badgeAlertas.style.display = 'inline'; }
+      } catch (e) {}
+
+      // Logs
+      function renderLogs() {
+        const allLogs = DB.getLogs({}).slice(0, 100);
+        let html = '<div class="card"><div class="card-header"><h3 class="card-title">Últimos 100 registros</h3></div>';
+        if (allLogs.length === 0) {
+          html += '<div class="empty-state"><p class="empty-state-title">Nenhum log registrado</p></div>';
+        } else {
+          html += '<div class="table-container"><table class="table"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Entidade</th><th>Detalhes</th></tr></thead><tbody>';
+          allLogs.forEach(l => {
+            html += '<tr>' +
+              '<td class="text-xs" style="white-space:nowrap">' + App.formatDate(l.timestamp) + '</td>' +
+              '<td>' + App.escapeHtml(l.usuarioNome) + '</td>' +
+              '<td><span class="badge badge-neutral">' + App.escapeHtml(l.acao) + '</span></td>' +
+              '<td class="text-xs">' + App.escapeHtml(l.entidade || '-') + '</td>' +
+              '<td class="text-sm text-muted" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + App.escapeHtml(l.detalhes || '-') + '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+        }
+        html += '</div>';
+        document.getElementById('page-content').innerHTML = html;
+      }
+
+      function renderPlaceholder() {
+        document.getElementById('page-content').innerHTML =
+          '<div class="card"><div class="empty-state"><div class="empty-state-icon">🚧</div>' +
+          '<p class="empty-state-title">Em construção</p>' +
+          '<p class="empty-state-text">Este módulo será implementado nas próximas fases.</p></div></div>';
+      }
+
+      // Init
+      App.init();
+      Checklist.init();
+      navigateTo('dashboard');
+    });
+  </script>
+</body>
+</html>
